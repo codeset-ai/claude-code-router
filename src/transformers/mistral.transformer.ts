@@ -54,7 +54,16 @@ export class MistralTransformer {
   static TransformerName = 'mistral';
 
   async transformRequestIn(request: any): Promise<any> {
+    console.log('[MistralTransformer] transformRequestIn called');
+    console.log(
+        '[MistralTransformer] request.system type:', typeof request.system,
+        Array.isArray(request.system));
+    console.log(
+        '[MistralTransformer] request.messages count:',
+        request.messages?.length);
+
     if (request.system) {
+      console.log('[MistralTransformer] Flattening request.system');
       request.system = flattenContentToString(request.system);
     }
 
@@ -64,6 +73,7 @@ export class MistralTransformer {
 
     for (const message of request.messages) {
       if (message.role === 'system' && Array.isArray(message.content)) {
+        console.log('[MistralTransformer] Flattening system message content');
         message.content = flattenContentToString(message.content);
       }
 
