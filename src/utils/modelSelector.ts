@@ -64,7 +64,8 @@ const AVAILABLE_TRANSFORMERS = [
   'vertex-gemini',
   'chutes-glm',
   'qwen-cli',
-  'rovo-cli'
+  'rovo-cli',
+  'mistral-toolid'
 ];
 
 function getConfigPath(): string {

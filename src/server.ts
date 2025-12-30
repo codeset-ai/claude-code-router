@@ -6,9 +6,22 @@ import fastifyStatic from "@fastify/static";
 import { readdirSync, statSync, readFileSync, writeFileSync, existsSync } from "fs";
 import { homedir } from "os";
 import {calculateTokenCount} from "./utils/router";
+import { customTransformers } from "./transformers";
 
 export const createServer = (config: any): Server => {
   const server = new Server(config);
+
+  server.app.addHook('onReady', async () => {
+    const transformerService = (server.app as any)._server?.transformerService;
+    if (transformerService) {
+      for (const TransformerClass of customTransformers) {
+        const name = (TransformerClass as any).TransformerName;
+        if (name && !transformerService.getTransformer(name)) {
+          transformerService.registerTransformer(name, new TransformerClass());
+        }
+      }
+    }
+  });
 
   server.app.post("/v1/messages/count_tokens", async (req, reply) => {
     const {messages, tools, system} = req.body;
