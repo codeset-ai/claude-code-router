@@ -1,8 +1,7 @@
-import { MistralToolIdTransformer } from './mistral-toolid.transformer';
+import {MistralTransformer} from './mistral.transformer';
 
 export const customTransformers = [
-  MistralToolIdTransformer,
+  MistralTransformer,
 ];
 
-export { MistralToolIdTransformer };
-
+export {MistralTransformer};

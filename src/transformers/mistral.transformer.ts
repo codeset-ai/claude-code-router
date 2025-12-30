@@ -38,15 +38,43 @@ function getOriginalId(shortId: string): string {
   return idMappings.get(shortId) || shortId;
 }
 
-export class MistralToolIdTransformer {
-  static TransformerName = 'mistral-toolid';
+function flattenContentToString(content: any): string {
+  if (typeof content === 'string') {
+    return content;
+  }
+  if (Array.isArray(content)) {
+    return content.filter((block: any) => block.type === 'text' && block.text)
+        .map((block: any) => block.text)
+        .join('\n');
+  }
+  return '';
+}
+
+export class MistralTransformer {
+  static TransformerName = 'mistral';
 
   async transformRequestIn(request: any): Promise<any> {
+    if (request.system) {
+      request.system = flattenContentToString(request.system);
+    }
+
     if (!request.messages) {
       return request;
     }
 
     for (const message of request.messages) {
+      if (message.role === 'system' && Array.isArray(message.content)) {
+        message.content = flattenContentToString(message.content);
+      }
+
+      if (message.role === 'user' && Array.isArray(message.content)) {
+        const hasOnlyText =
+            message.content.every((block: any) => block.type === 'text');
+        if (hasOnlyText) {
+          message.content = flattenContentToString(message.content);
+        }
+      }
+
       if (message.role === 'assistant' && message.tool_calls) {
         for (const toolCall of message.tool_calls) {
           if (toolCall.id && !isValidMistralId(toolCall.id)) {
